@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAL\EF\TestEF.cs" />
+    <Compile Include="DAL\Repositories\UOWTest.cs" />
     <Compile Include="TestDBContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,24 +1,36 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MOUNB.DAL.Entities;
+using MOUNB.DAL.Repositories;
+using MOUNB.DAL.EF;
 using System.Linq;
 
-namespace MOUNB.WEB.Tests.DAL.EF
+namespace MOUNB.WEB.Tests.DAL.Repositories
 {
     [TestClass]
-    public class TestEF
+    public class UOWTest
     {
-        private TestDBContext db = new TestDBContext();
+        //UnitOfWork unitOfWork = new UnitOfWork("name = TestDBConnection");
+
+        TestDBContext db;
+        UnitOfWork unitOfWork;
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            db = new TestDBContext();
+            unitOfWork = new UnitOfWork(db);
+        }
 
         [TestMethod]
         public void Users_GetAll()
         {
             // arrange
             // act
-            var users =  db.Users.ToList();
+            var users = unitOfWork.Users.GetAll();
 
             // assert
             Assert.IsNotNull(users);
-            Assert.AreNotEqual(0, users.Count);
+            Assert.AreNotEqual(0, users.Count());
         }
 
         [TestMethod]
@@ -26,8 +38,7 @@ namespace MOUNB.WEB.Tests.DAL.EF
         {
             // arrange
             // act
-            var user = db.Users.Find(1);
-
+            var user = unitOfWork.Users.GetById(1);
 
             // assert
             Assert.IsNotNull(user);
@@ -38,14 +49,20 @@ namespace MOUNB.WEB.Tests.DAL.EF
         {
             // arrange
             User newUser = new User()
-            { Name = "UTest User", Login = "123123", Password = "123123"
-            , Position = "UTest", Role = UserRole.Нет };
+            {
+                Name = "UTest User",
+                Login = "123123",
+                Password = "123123"
+            ,
+                Position = "UTest",
+                Role = UserRole.Нет
+            };
 
             int oldUserCount = db.Users.Count();
             // act
 
-            var user = db.Users.Add(newUser);
-            db.SaveChanges();
+            unitOfWork.Users.Create(newUser);
+            unitOfWork.Commit();
 
             var users = db.Users.ToList();
             var newReaders = from u in db.Users

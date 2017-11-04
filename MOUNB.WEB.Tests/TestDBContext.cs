@@ -1,8 +1,7 @@
-﻿using System;
+﻿using MOUNB.DAL.EF;
+using MOUNB.DAL.Entities;
 using System.Collections.Generic;
 using System.Data.Entity;
-using MOUNB.DAL.EF;
-using MOUNB.DAL.Entities;
 using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace MOUNB.WEB.Tests
