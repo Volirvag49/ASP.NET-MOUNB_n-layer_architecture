@@ -20,8 +20,6 @@ namespace MOUNB.DAL.Repositories
             dbSet = context.Set<T>();
         }
 
-
-
         public IEnumerable<T> GetAll()
         {
             return dbSet.ToList();

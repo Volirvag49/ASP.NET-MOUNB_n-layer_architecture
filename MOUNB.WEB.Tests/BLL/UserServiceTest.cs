@@ -1,22 +1,25 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MOUNB.DAL.Entities;
+using MOUNB.BLL.DTO;
+using MOUNB.BLL.Services;
 using MOUNB.DAL.Repositories;
-using MOUNB.DAL.EF;
 using System.Linq;
 
-namespace MOUNB.WEB.Tests.DAL.Repositories
+namespace MOUNB.WEB.Tests.BLL
 {
     [TestClass]
-    public class UOWTest
+    public class UserServiceTest
     {
         TestDBContext db;
         UnitOfWork unitOfWork;
+        UserService userService;
 
         [TestInitialize]
         public void Initialize()
         {
             db = new TestDBContext();
             unitOfWork = new UnitOfWork(db);
+            userService = new UserService(unitOfWork);
+            
         }
 
         [TestMethod]
@@ -24,34 +27,35 @@ namespace MOUNB.WEB.Tests.DAL.Repositories
         {
             // arrange
             // act
-            var users = unitOfWork.Users.GetAll();
+            var users = userService.GetAllUsers();
 
             // assert
             Assert.IsNotNull(users);
-            Assert.AreNotEqual(0, users.Count());
         }
 
         [TestMethod]
         public void Users_FindById()
         {
             // arrange
+            int? Id = 1;
+
             // act
-            var user = unitOfWork.Users.GetById(1);
+            var user = userService.GetUserById(Id);
 
             // assert
             Assert.IsNotNull(user);
+            Assert.AreEqual(Id, user.Id);
         }
 
         [TestMethod]
         public void Users_Create()
         {
             // arrange
-            User newUser = new User()
+            UserDTO newUser = new UserDTO()
             {
                 Name = "UTest User",
                 Login = "123123",
-                Password = "123123"
-            ,
+                Password = "123123",
                 Position = "UTest",
                 Role = UserRole.Нет
             };
@@ -59,8 +63,7 @@ namespace MOUNB.WEB.Tests.DAL.Repositories
             int oldUserCount = db.Users.Count();
             // act
 
-            unitOfWork.Users.Create(newUser);
-            unitOfWork.Commit();
+            userService.RegisterUser(newUser);
 
             var users = db.Users.ToList();
             var newReaders = from u in db.Users

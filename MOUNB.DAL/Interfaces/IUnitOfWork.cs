@@ -3,7 +3,7 @@ using System;
 
 namespace MOUNB.DAL.Interfaces
 {
-    interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork : IDisposable
     {
         IRepository<User> Users { get; }
         void Commit();
