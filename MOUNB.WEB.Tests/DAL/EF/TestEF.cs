@@ -19,6 +19,8 @@ namespace MOUNB.WEB.Tests.DAL.EF
             // assert
             Assert.IsNotNull(users);
             Assert.AreNotEqual(0, users.Count);
+            Assert.AreEqual("Пользователь по умолчанию 1", users[0].Name);
+            Assert.AreEqual("Пользователь по умолчанию 2", users[1].Name);
         }
 
         [TestMethod]
@@ -55,6 +57,27 @@ namespace MOUNB.WEB.Tests.DAL.EF
             // assert
             Assert.AreEqual(oldUserCount + 1, users.Count);
             Assert.AreNotEqual(0, newReaders.Count());
+        }
+
+        [TestMethod]
+        public void Users_Delete()
+        {
+            // arrange
+            User user = db.Users.Find(1);
+
+            int oldUserCount = db.Users.Count();
+            // act
+
+            db.Users.Remove(user);
+            db.SaveChanges();
+
+            var users = db.Users.ToList();
+            var emptyUser = db.Users.Find(1);
+
+            // assert
+            Assert.AreEqual(oldUserCount - 1, users.Count);
+            Assert.IsNull(emptyUser);
+
         }
     }
 }

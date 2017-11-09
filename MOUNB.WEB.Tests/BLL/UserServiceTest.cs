@@ -2,7 +2,9 @@
 using MOUNB.BLL.DTO;
 using MOUNB.BLL.Services;
 using MOUNB.DAL.Repositories;
+using System.Collections.Generic;
 using System.Linq;
+using PagedList;
 
 namespace MOUNB.WEB.Tests.BLL
 {
@@ -18,8 +20,7 @@ namespace MOUNB.WEB.Tests.BLL
         {
             db = new TestDBContext();
             unitOfWork = new UnitOfWork(db);
-            userService = new UserService(unitOfWork);
-            
+            userService = new UserService(unitOfWork);           
         }
 
         [TestMethod]
@@ -27,10 +28,38 @@ namespace MOUNB.WEB.Tests.BLL
         {
             // arrange
             // act
-            var users = userService.GetAllUsers();
+            var users = userService.GetAllUsers() as List<UserDTO>;
 
             // assert
             Assert.IsNotNull(users);
+            Assert.AreNotEqual(0, users.Count);
+            Assert.AreEqual("Пользователь по умолчанию 1", users[0].Name);
+            Assert.AreEqual("Пользователь по умолчанию 2", users[1].Name);
+        }
+
+        [TestMethod]
+        public void Users_GetPagedUsers()
+        {
+            // arrange
+            string sortOrder = "Login";
+            string searchString = "";
+            string searchSelection = "";
+            int page = 1;
+            int pageSize = 4;
+            // act
+            StaticPagedList<UserDTO> usersPage_1 = userService.GetPagedUsers(sortOrder, searchString, searchSelection, page, pageSize);
+
+            page = 2;
+            StaticPagedList<UserDTO> usersPage_2 = userService.GetPagedUsers(sortOrder, searchString, searchSelection, page, pageSize);
+
+            // assert
+            Assert.IsNotNull(usersPage_1);
+            Assert.AreNotEqual(0, usersPage_1.TotalItemCount);
+            Assert.AreEqual("Пользователь по умолчанию 1", usersPage_1[0].Name);
+            Assert.AreEqual("Давыдов Варфоломей Викторович", usersPage_1[3].Name);
+
+            Assert.AreEqual("Дидиченко Арсений Александрович", usersPage_2[0].Name);
+            Assert.AreEqual("Леонтьева Васса Ивановна", usersPage_2[3].Name);
         }
 
         [TestMethod]
@@ -74,5 +103,25 @@ namespace MOUNB.WEB.Tests.BLL
             Assert.AreEqual(oldUserCount + 1, users.Count);
             Assert.AreNotEqual(0, newReaders.Count());
         }
+
+        [TestMethod]
+        public void Users_Delete()
+        {
+            // arrange
+            UserDTO user = userService.GetUserById(1);
+
+            int oldUserCount = db.Users.Count();
+            // act
+
+            userService.DeleteUser(user);
+
+            var users = db.Users.ToList();
+            var emptyUser = db.Users.Find(1);
+
+            // assert
+            Assert.AreEqual(oldUserCount - 1, users.Count);
+            Assert.IsNull(emptyUser);
+
+        }             
     }
 }
