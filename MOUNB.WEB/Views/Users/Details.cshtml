@@ -1,13 +1,13 @@
 ﻿@model MOUNB.WEB.Models.UserViewModel
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Просмотр";
 }
 
-<h2>Details</h2>
+<h2>Просмотр</h2>
 
 <div>
-    <h4>UserViewModel</h4>
+    <h4>Пользователь</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -45,6 +45,6 @@
     </dl>
 </div>
 <p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Изменить", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Список пользователей", "Index")
 </p>

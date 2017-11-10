@@ -7,6 +7,7 @@ using MOUNB.WEB.Controllers;
 using System.Collections.Generic;
 using MOUNB.WEB.Models;
 using System.Web.Mvc;
+using PagedList;
 
 namespace MOUNB.WEB.Tests.WEB
 {
@@ -28,17 +29,25 @@ namespace MOUNB.WEB.Tests.WEB
         }
 
         [TestMethod]
-        public void Users_GetAll()
+        public void Users_Index()
         {
             //Arrange
+            string sortOrder = null;
+            string searchString = null;
+            string searchSelection = null;
+            string currentFilter = null;
+            string currentSelection = null; 
+            int page = 1;
+            int pageSize = 5;
             //Act
-            var users = (objController.Index() as ViewResult).Model 
-                as List<UserViewModel>;
+            objController.Index(sortOrder, searchString, searchSelection, currentFilter, currentSelection, page, pageSize);
+
+            IPagedList<UserViewModel> users = objController.ViewData.Model as IPagedList<UserViewModel>;
             //Assert
             Assert.IsNotNull(users);
             Assert.AreNotEqual(0, users.Count);
-            Assert.AreEqual("Пользователь по умолчанию 1", users[0].Name);
-            Assert.AreEqual("Пользователь по умолчанию 2", users[1].Name);
+            Assert.AreEqual(9, users[0].Id);
+            Assert.AreEqual(6, users[1].Id);
         }
     }
 }

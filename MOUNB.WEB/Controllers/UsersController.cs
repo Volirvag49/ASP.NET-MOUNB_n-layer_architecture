@@ -7,6 +7,7 @@ using MOUNB.BLL.DTO;
 using MOUNB.BLL.Interfaces;
 using MOUNB.BLL.Infrastructure;
 using AutoMapper;
+using PagedList;
 using MOUNB.WEB.Models;
 
 namespace MOUNB.WEB.Controllers
@@ -21,12 +22,38 @@ namespace MOUNB.WEB.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index()
+        public ActionResult Index(string sortOrder, string searchString, string searchSelection, string currentFilter, string currentSelection, int? page, int? pageSize)
         {
-            IEnumerable<UserDTO> usersDTO = userService.GetAllUsers();
+            ViewBag.CurrentSort = sortOrder;
+
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.LoginSortParm = sortOrder == "Login" ? "Login_desc" : "Login";
+            ViewBag.PositionSortParm = sortOrder == "Position" ? "Position_desc" : "Position";
+            ViewBag.RoleSortParm = sortOrder == "Role" ? "Role_desc" : "Role";
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+                searchSelection = currentSelection;
+            }
+
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentSelection = searchSelection;
+            ViewBag.CurrentPageSize = pageSize;
+
+            int currentPage = (page ?? 1);
+            pageSize = (pageSize ?? 5);
+            StaticPagedList<UserDTO> usersDTOPaged = userService.GetPagedUsers(sortOrder, searchString, searchSelection, currentPage, pageSize);
+
             Mapper.Initialize(cfg => cfg.CreateMap<UserDTO, UserViewModel>());
-            var users = Mapper.Map<IEnumerable<UserDTO>, List<UserViewModel>>(usersDTO);
-            return View(users);
+            var users = Mapper.Map<IEnumerable<UserDTO>, IEnumerable<UserViewModel>>(usersDTOPaged);
+            var usersPaged = new StaticPagedList<UserViewModel>(users, usersDTOPaged.GetMetaData());
+
+            return View(usersPaged);
         }
 
         [HttpGet]
@@ -42,14 +69,21 @@ namespace MOUNB.WEB.Controllers
         {
             if (ModelState.IsValid)
             {
-                Mapper.Initialize(cfg => cfg.CreateMap<UserViewModel, UserDTO>());
-                UserDTO user = Mapper.Map<UserViewModel, UserDTO>(model);
-                userService.RegisterUser(user);
-                return RedirectToAction("Index");
-            }
+                try
+                {
+                    Mapper.Initialize(cfg => cfg.CreateMap<UserViewModel, UserDTO>());
+                    UserDTO user = Mapper.Map<UserViewModel, UserDTO>(model);
+                    userService.RegisterUser(user);
+                    return RedirectToAction("Index");
+                }
+                catch (ValidationException ex)
+                {
+                    ModelState.AddModelError(ex.Property, ex.Message);
 
+                }
+            }
             return View(model);
-        }
+        } 
 
         [HttpGet]
         public ActionResult Details(int? id)
@@ -81,6 +115,7 @@ namespace MOUNB.WEB.Controllers
             UserViewModel user = Mapper.Map<UserDTO, UserViewModel>(userDTO);
 
             return View(user);
+
         }
 
         [HttpPost]
@@ -89,12 +124,19 @@ namespace MOUNB.WEB.Controllers
         {
             if (ModelState.IsValid)
             {
-                Mapper.Initialize(cfg => cfg.CreateMap<UserViewModel, UserDTO>());
-                UserDTO user = Mapper.Map<UserViewModel, UserDTO>(model);
-                userService.EditUser(user);
-                return RedirectToAction("Index");
-            }
+                try
+                {
+                    Mapper.Initialize(cfg => cfg.CreateMap<UserViewModel, UserDTO>());
+                    UserDTO user = Mapper.Map<UserViewModel, UserDTO>(model);
+                    userService.EditUser(user);
+                    return RedirectToAction("Index");
+                }
+                catch (ValidationException ex)
+                {
+                    ModelState.AddModelError(ex.Property, ex.Message);
 
+                }
+            }
             return View(model);
         }
 

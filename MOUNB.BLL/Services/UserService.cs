@@ -32,9 +32,8 @@ namespace MOUNB.BLL.Services
 
         public StaticPagedList<UserDTO> GetPagedUsers(string sortOrder, string searchString, string searchSelection, int? page, int? pageSize)
         {
-            // filter: q => q.Name ==""
             Func<IQueryable<User>, IOrderedQueryable<User>> sortQuery;
-            Expression<Func<User, bool>> searchQuery = null;
+            Expression<Func<User, bool>> searchQuery =null;
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -53,7 +52,7 @@ namespace MOUNB.BLL.Services
                         searchQuery = q => q.Name.ToLower().Contains(searchString.ToLower());
                         break;
                 }
-            } // Конец if (!String.IsNullOrEmpty(searchString))
+            } 
 
             switch (sortOrder)
             {
@@ -83,7 +82,6 @@ namespace MOUNB.BLL.Services
                     break;
             }
 
-
             var pagedUsers = unitOfWork.Users.GetWithPaging(orderBy: sortQuery, filter: searchQuery, size: pageSize.Value, page: page.Value);
 
             Mapper.Initialize(cfg =>
@@ -93,8 +91,8 @@ namespace MOUNB.BLL.Services
             });
 
             var usersDTO = Mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(pagedUsers.ToArray());
-            var result = new StaticPagedList<UserDTO>(usersDTO, pagedUsers.GetMetaData());
-            return result;
+            var usersDTOPaged= new StaticPagedList<UserDTO>(usersDTO, pagedUsers.GetMetaData());
+            return usersDTOPaged;
         }
 
         public UserDTO GetUserById(int? id)
@@ -103,7 +101,6 @@ namespace MOUNB.BLL.Services
             {
                 throw new ValidationException("Требуется id пользователя", "");
             }
-
 
             var user = unitOfWork.Users.GetById(id.Value);
 
@@ -115,8 +112,8 @@ namespace MOUNB.BLL.Services
             Mapper.Initialize(cfg => cfg.CreateMap<User, UserDTO>());
 
             return Mapper.Map<User, UserDTO>(user);
-
         }
+
         // Проверка логина на уникальность 
         private void CheckLogin(UserDTO user)
         {
@@ -142,7 +139,6 @@ namespace MOUNB.BLL.Services
 
             unitOfWork.Users.Create(user);
             unitOfWork.Commit();           
-
         }
 
         public void EditUser(UserDTO userDTO)

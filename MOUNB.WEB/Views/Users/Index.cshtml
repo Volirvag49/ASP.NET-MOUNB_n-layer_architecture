@@ -1,24 +1,54 @@
-﻿@model IEnumerable<MOUNB.WEB.Models.UserViewModel>
+﻿@model PagedList.IPagedList<MOUNB.WEB.Models.UserViewModel>
+@using PagedList.Mvc;
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Пользователи";
 }
 
-<h2>Index</h2>
-
+<h2>Пользователи</h2>
+<form id="searchForm" action="@Url.Action("Index")" method="get" class="form-inline">
+    <label>Поиск: </label>
+    <div class="form-group">
+        <input id="searchString" name="searchString" type="text" value="" class="form-control">
+    </div>
+    <label> По: </label>
+    <div class="form-group">
+        <select name="searchSelection" size="1" class="form-control">
+            <option value="Name" selected="selected">ФИО</option>
+            <option value="Login">Логин</option>
+            <option value="Position">Должность</option>
+            <option value="Role">Роль</option>
+        </select>
+    </div>
+    <label> Кол-Во:</label>
+    <div class="form-group">
+        <select name="pageSize" size="1" class="form-control">
+            <option value="3">3</option>
+            <option value="5" selected="selected">5</option>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+    <button type="submit" value="Поиск" class="btn btn-default glyphicon glyphicon-search"></button>
+</form>
+<br />
 <p>
-    @Html.ActionLink("Register New user", "Register")
+    @Html.ActionLink("Добавить", "Register")
 </p>
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.Name)
+            @Html.ActionLink("ФИО", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter, currentSelection = ViewBag.CurrentSelection, pageSize = ViewBag.CurrentPageSize }, new { @class = "glyphicon glyphicon-sort" })
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Login)
+            @Html.ActionLink("Логин", "Index", new { sortOrder = ViewBag.LoginSortParm, currentFilter = ViewBag.CurrentFilter, currentSelection = ViewBag.CurrentSelection, pageSize = ViewBag.CurrentPageSize }, new { @class = "glyphicon glyphicon-sort" })
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Position)
+            @Html.ActionLink("Должность", "Index", new { sortOrder = ViewBag.PositionSortParm, currentFilter = ViewBag.CurrentFilter, currentSelection = ViewBag.CurrentSelection, pageSize = ViewBag.CurrentPageSize }, new { @class = "glyphicon glyphicon-sort" })
+        </th>
+        <th>
+            @Html.ActionLink("Роль", "Index", new { sortOrder = ViewBag.RoleSortParm, currentFilter = ViewBag.CurrentFilter, currentSelection = ViewBag.CurrentSelection }, new { @class = "glyphicon glyphicon-sort" })
         </th>
         <th></th>
     </tr>
@@ -35,11 +65,18 @@
             @Html.DisplayFor(modelItem => item.Position)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+            @Html.DisplayFor(modelItem => item.Role)
+        </td>
+        <td>
+            @Html.ActionLink("Просмотр", "Details", new { id = item.Id }) |
+            @Html.ActionLink("Изменить", "Edit", new { id=item.Id }) |
+            @Html.ActionLink("Удалить", "Delete", new { id=item.Id })
         </td>
     </tr>
 }
-
 </table>
+<label>
+    Стр @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) из @Model.PageCount. Всего элементов: @Model.TotalItemCount.
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+    new {sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter, currentSelection = ViewBag.CurrentSelection, pageSize = ViewBag.CurrentPageSize, page}))
+</label>
